@@ -1,120 +1,143 @@
-Tipit protocol, a cheap way of implementing tipping
+* TipIt protocol
 
-TODO Motivation, tipping is not easy anymore
-     While we wait for crypto
-* Objectives
+A cheap way of implementing tipping.
 
-  Can work offline, can be implemented cheap on receivers, trustless between Payers and Receivers, only trusted actor should be *Exchanges*, secure by using pubKey cryptography specially signatures.
-  TODO: expand
+** Motivation
 
-* Actors
-** Exchange
+ With less people carrying cash every day because of debit card systems, the act of tipping (a small sum of money given to someone as a gratitude expression) is getting harder and harder.
 
-   A centralized entity that can exchange any money like (US$, credit card, bitcoins, etc) amount into *COINS* and back.
-   This is the only actor that needs to be trusted by users.
+ A lot of people still depends on tips for a living (street performers of all kinds) which because the nature of their service the bank account + POS systems doesn't work.
 
-   It's normal operation will be to sell *COINS* to *Payers* and buy *COINS* from *Receivers*.
+ *TipIt* is a protocol that explores a solution to this problem by using electronic devices.
 
-   It can be implemented as a centralized server that receives credit card payments and gives back signed *COINS*.
+ In the future, a solution based on some blockchain technology like bitcoin is probably a much better solution which will not even require a trusted party, but the learning curve and
+ the price for that technology is still high.
 
-   It also needs a set of places where people can fisically go obtain money by selling their *COINS*. This is important since most users of *Tipit* will now own
-   a bank account.
+** Objectives
 
-   *Exchange* should keep track of what tokenId belongs to what userId (country id, creadit card, full name, etc)
+   - Transactions should be easy
+   - Transactions should NOT require internet connection
+   - Devices used for receiving tips should be able to be built cheaply
+   - Interaction between the tip payers and the receivers should be trustless and secure (can be done by using cryptography).
 
-** Payers
+** Overview
 
-   Anybody that wants to tip. Can buy *COINS* from the *Exchange* and use them to tip *Receivers*.
+   *TipIt* solution is to create a one time use virtual coin, that can be exchanged between the tip payer and the receiver using cryptography to secure the transaction.
 
-   Can be implemented with a cellphone app that can buy *COINS* (in advance or online) from the *Exchange* and tip *Receivers* just buy using the cellphone.
+   It depends on a central authority, the *exchange*, that will create, sell, buy and destroy this virtual coins, while enforcing rules like avoiding double spent coins.
 
-** Receivers
+** Actors
+*** Exchange
 
-   Anybody who receives tips. Can collect *COINS* from *Payers* and then exchange them for money by going to the *Exchange*.
+    A centralized entity that can exchange money (cash, credit card, bitcoins, etc) into *COINS* and back.
 
-   Can be implemented as any device that can at least :
+    *This is the only actor that needs to be trusted by users*
 
-   - exchange information with a cellphone (bluetooth, NFC, etc)
-   - sign data
-   - validate a cryptographyc signature
-   - store *COINS* data
+    It's normal operation will be to create *COINS*, sell them to *payers*, buy *COINS* from *receivers* and destroy them.
 
-   A good implementation should have the devices needed by the *Receivers* implemented as cheapest as possible since not all people interested in tips can afford a cellphone.
+    It can be implemented as a centralized server that receives credit card payments and gives back signed *COINS*.
+
+    It also needs a set of places where people can fiscally go to obtain money by selling their *COINS*. This is important since most *receivers* of *TipIt* probably don't own
+    a bank account.
+
+    The *exchange* should keep track of what *COINS* where issued to what users (document id, credit card, full name, etc) in order to track down attacks like double spends.
+
+    Once tokens are sold by the *receivers* the *exchange* needs to destroy used *COINS* probably by blacklisting them.
+
+*** Payers
+
+    Payers are anybody who wants to tip. Can buy *COINS* from the *exchange* and use them to tip *receivers*.
+
+    Can be implemented with a cellphone app that can buy *COINS* (in advance or online) from the *exchange* and tip *receivers* just by using the cellphone.
+
+*** Receivers
+
+    Receivers are anybody who receives tips. Can collect *COINS* from *payers* and then exchange them for money by going to the *exchange*.
+
+    Can be implemented as any device that can at least :
+
+    - exchange information with a cellphone (bluetooth, NFC, etc)
+    - sign data
+    - validate a cryptographyc signature
+    - store *COINS* data
+    - work with a rechargeable battery
+
+    A good implementation should make the devices needed by the *receivers* implemented as cheaper as possible, since not all people interested in tips can afford expensive equipment like a cellphone.
 
 
-* Tip Tokens and COINS
+** Tip Tokens and COINS
 
-  *Tokens* are structured data that contains [TokenId, TokenValue, TokenCurrency]
+   *Tokens* are structured data that contains [TokenId, TokenValue, TokenCurrency]
 
-  *COINS* are just *Tokens* signed by the *Payers* and then authorized (signed) by the *Exchange* before they can be used.
+   *COINS* are just *Tokens* signed by the *payers* and then authorized (signed) by the *exchange* before they can be used.
 
-  Every token (then every coin) is meant to be used only once and then is banned forever. This rules are enforced by the *Exchange*.
+   Every token (then every coin) is meant to be used only once, then it is banned forever. This rules are enforced by the *exchange*.
 
-  An example coin implementation can look like:
-#+BEGIN_SRC javascript
-  {
-    token: {
-      tokenId: "8a3e0ef9-b702-446d-a133-d0b091f1bdd3",
-      value: 10,
-      currency: "U$"
-    },
-    exchangeSignature: "..."
-  }
-#+END_SRC
+   An example coin implementation can look like:
+ #+BEGIN_SRC javascript
+   {
+     token: {
+       tokenId: "8a3e0ef9-b702-446d-a133-d0b091f1bdd3",
+       value: 10,
+       currency: "U$"
+     },
+     exchangeSignature: "..."
+   }
+ #+END_SRC
 
-  Probably a binary format is preferred so *Receivers* devices can be implemented with cheaper hardware.
-** Token format
-   TBD
-** Coin format
-   TDB
+   Probably a binary format is preferred so *receivers* devices can be implemented with cheaper hardware.
+*** Token format
+    TBD
+*** Coin format
+    TDB
 
-* Obtaining COINS
+** Obtaining COINS
 
-  For *Payers* to obtain *COINS* they first need to register in the *Exchange* with an id, credit card, and public key (generated by the app normally).
+   For *payers* to obtain *COINS* they first need to register in the *exchange* with an id, credit card, and public key (generated by the app normally).
 
-  When *Payers* wants to obtain *COINS* they first need to generate *Tokens* by choosing a value and a currency.
+   When *payers* wants to obtain *COINS* they first need to generate *Tokens* by choosing a value and a currency.
 
-  *Tokens* are signed with the users public key and then sent to the *Exchange* together with the money to cover for their values.
+   *Tokens* are signed with the users public key and then sent to the *exchange* together with the money to cover for their values.
 
-  The *Exchange* can validate the token signature by using the registered user public key, and keep the signed token as a proof of request.
+   The *exchange* can validate the token signature by using the registered user public key, and keep the signed token as a proof of request.
 
-  The *Exchange* will track the users coin so if bad *Payers* try to double spend a token the *Exchange* will figure it out and resolve the problem.
+   The *exchange* will track the users coin so if bad *payers* try to double spend a token the *exchange* track it down and resolve the problem.
 
-  The last step for the *Exchange* before sending the coins back the user is to generate them by signing the *Tokens* with the *Exchange* private key which will correspond to the public key known by all *Receivers* devices.
+   The last step for the *exchange* before sending the created coins back to the user is to generate them by signing the *Tokens* with the *exchange* private key which will correspond to the public key known by all *receivers* devices.
 
-** Request_Msg
-   TBD
-** Response_Msg
-   TBD
+*** Request_Msg
+    TBD
+*** Response_Msg
+    TBD
 
-* Paying (Tipping)
+** Paying (Tipping)
 
-  The act of tipping is the act of transferring the *COINS* in the *Payers* device, to the *Receivers* device.
+   The act of tipping is the act of transferring the *COINS* in the *payers* device, to the *receivers* device.
 
-  This can be accomplished by any wireless communication system supported by both devices.
+   This can be accomplished by any wireless communication system supported by both devices.
 
-  When the transfer is complete the *Payers* device should show success.
+   When the transfer is complete the *payers* device should show success.
 
-* Receiving
+** Receiving
 
-  You receive a tip by offering the *Receivers* device to the *Payers* and wait for a confirmation.
+   You receive a tip by offering the *receivers* device to the *payers* and wait for a confirmation.
 
-  The *Receivers* device should first validate the *COINS* exchange signature and then store it if valid. Only when a valid coin is received the device should show a success light.
+   The *receivers* device should first validate the *COINS* exchange signature and then store it if valid. Only when a valid coin is received the device should show a success light.
 
-  At any moment *Receivers* can go to the *Exchange* and sell their *COINS* for money.
+   At any moment *receivers* can go to the *exchange* and sell their *COINS* for money.
 
-* Selling COINS
+** Selling COINS
 
-  For *Receivers* to sell *COINS* they first need to register in the *Exchange* with an id and public key.
+   For *receivers* to sell *COINS* they first need to register in the *exchange* with an id and public key.
 
-  Before sending the *COINS* to the *Exchange* the *Receivers* device signs the coin with it private key which the *Exchange* will have to validate and keep as a sell proof.
+   Before sending the *COINS* to the *exchange* the *receivers* device signs the coin with it private key which the *exchange* will have to validate and keep as a sell proof.
 
-  The *Exchange* will track every sold token in a blacklist so they can only be sold once.
+   The *exchange* will track every sold token in a blacklist so they can only be sold once.
 
-* Implementation ideas
-** Exchange server
-   TBD
-** Payers cellphone app
-   TBD
-** Receivers device
-   TBD
+** Implementation ideas
+*** Exchange server
+    TBD
+*** Payers cellphone app
+    TBD
+*** Receivers device
+    TBD
